@@ -1,0 +1,4 @@
+.DS_Store
+examples/logger/logger.so
+examples/logger/logger.dylib
+examples/logger/testprog
