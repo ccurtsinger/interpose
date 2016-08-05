@@ -3,7 +3,7 @@ This single-header project implements dynamic library symbol interposition for b
 
 To use the interpose tool, just `#include <interpose.hh>` in the source file where you will implement the replacement functions. A simple replacement function looks like this:
 
-```
+```c++
 INTERPOSE(malloc)(size_t sz) {
   fprintf(stderr, "Caught a call to malloc(%lu)\n", sz);
   return real::malloc(sz);
