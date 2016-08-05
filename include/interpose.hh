@@ -54,7 +54,7 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
       if(!initialized) { \
         real_##NAME = reinterpret_cast<decltype(::NAME)*>( \
           reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, #NAME))); \
-        __atomic_store_n(&initialized, true, __ATOMIC_RELEASE);
+        __atomic_store_n(&initialized, true, __ATOMIC_RELEASE); \
       } \
       return real_##NAME(std::forward<Args>(args)...); \
     } \

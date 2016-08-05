@@ -16,7 +16,7 @@ INTERPOSE(free)(void* p) {
 
 INTERPOSE(calloc)(size_t n, size_t sz) {
   fprintf(stderr, "calloc(%lu, %lu)\n", n, sz);
-  static bool in_calloc = false;
+  static __thread bool in_calloc = false;
   if(in_calloc) return NULL;
   in_calloc = true;
   void* result = real::calloc(n, sz);
