@@ -19,6 +19,7 @@
 #if !defined(__INTERPOSE_HH)
 #define __INTERPOSE_HH
 
+#include <cstdint>
 #include <functional>
 #include <type_traits>
 #include <dlfcn.h>
@@ -51,8 +52,8 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
       static bool initialized = false; \
       static decltype(::NAME)* real_##NAME; \
       if(!initialized) { \
-        fprintf(stderr ,"Resolving " #NAME "\n"); \
-        real_##NAME = reinterpret_cast<decltype(::NAME)*>(dlsym(RTLD_NEXT, #NAME)); \
+        real_##NAME = reinterpret_cast<decltype(::NAME)*>( \
+          reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, #NAME))); \
         initialized = true; \
       } \
       return real_##NAME(std::forward<Args>(args)...); \
@@ -65,15 +66,19 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
 
 /// Structure exposed to the linker for interposition
 struct __osx_interpose {
-	void *new_func;
-	void *orig_func;
+	const void* new_func;
+	const void* orig_func;
 };
 
-/// Shorthand to generate the OSX interpose struct
+/**
+ * Generate a macOS interpose struct
+ * Types from: http://opensource.apple.com/source/dyld/dyld-210.2.3/include/mach-o/dyld-interposing.h
+ */
 #define OSX_INTERPOSE_STRUCT(NEW, OLD) \
   static const __osx_interpose __osx_interpose_##OLD \
     __attribute__((used, section("__DATA, __interpose"))) = \
-    { reinterpret_cast<void*>(NEW), reinterpret_cast<void*>(OLD) }
+    { reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(&(NEW))), \
+      reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(&(OLD))) }
 
 /**
   * The OSX interposition process is much simpler. Just create an OSX interpose struct,
