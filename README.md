@@ -12,7 +12,7 @@ INTERPOSE(malloc)(size_t sz) {
 
 This line declares a replacement function for `malloc` that logs the result, then passes the call on to the real `malloc` implementation. For this to work, the `malloc` symbol must be defined (by including `stdlib.h`). The replacement function is type-checked against the declared function, so compilation will fail if you try to replace `malloc` with a function that takes an `int` parameter. This helps prevent accidental type mismatch errors, but you can explicitly bypass this requirement by declaring `malloc` yourself instead of including the system-wide declaration.
 
-There is an example library in `examples/logger` that logs calls to `malloc`, `free`, `calloc`, `realloc`, and `exit`. Go to this directory and run `make test` to build the interposition library and run it against a simple test program.
+There is an example library in `examples/logger` that intercepts calls to `malloc`, `free`, `calloc`, and `realloc`. This library tracks the number of bytes allocated and freed by the program, and prints allocation stats just before the program exits.
 
 ## Copyright & License
 Copyright &copy; 2016 Charlie Curtsinger

@@ -1,19 +1,6 @@
 /*
- * Library call interposition utilities for Linux and macOS
- * Copyright &copy; 2016 Charlie Curtsinger
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * MIT License
+ * Copyright (c) 2017 Charlie Curtsinger
  */
 
 #if !defined(__INTERPOSE_HH)
@@ -41,9 +28,9 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
 /**
  * The linux interposition process uses weak aliases to replace the original function
  * and creates a real::___ function that will perform dynamic symbol resolution on the
- * first call. Beware interposing on calloc: you must check for recursive calls to
- * calloc and return NULL because the dynamic linker calls calloc when attempting to
- * resolve the calloc symbol.
+ * first call. Be careful when interposing on memory allocation functions in particular;
+ * simple operations like printing or symbol resolution could trigger another call to
+ * malloc or calloc, which can cause unbounded recursion.
  */
 #define INTERPOSE(NAME) \
   namespace real { \
