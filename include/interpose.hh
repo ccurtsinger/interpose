@@ -23,7 +23,7 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
   using ret_type = R;
 };
 
-#if defined(__linux__)
+#if defined(__ELF__)
 
 /**
  * The linux interposition process uses weak aliases to replace the original function
@@ -36,14 +36,14 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
   namespace real { \
     template<typename... Args> \
     auto NAME(Args... args) -> decltype(::NAME(args...)) { \
-      static bool initialized = false; \
       static decltype(::NAME)* real_##NAME; \
-      if(!initialized) { \
-        real_##NAME = reinterpret_cast<decltype(::NAME)*>( \
+      decltype(::NAME)* func = __atomic_load_n(&real_##NAME, __ATOMIC_CONSUME); \
+      if(!func) { \
+        func = reinterpret_cast<decltype(::NAME)*>( \
           reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, #NAME))); \
-        __atomic_store_n(&initialized, true, __ATOMIC_RELEASE); \
+        __atomic_store_n(&real_##NAME, func, __ATOMIC_RELEASE); \
       } \
-      return real_##NAME(std::forward<Args>(args)...); \
+      return func(std::forward<Args>(args)...); \
     } \
   } \
   extern "C" decltype(::NAME) NAME __attribute__((weak, alias("__interpose_" #NAME))); \
