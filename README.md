@@ -12,6 +12,12 @@ INTERPOSE(malloc)(size_t sz) {
 
 This line declares a replacement function for `malloc` that logs the result, then passes the call on to the real `malloc` implementation. For this to work, the `malloc` symbol must be defined (by including `stdlib.h`). The replacement function is type-checked against the declared function, so compilation will fail if you try to replace `malloc` with a function that takes an `int` parameter. This helps prevent accidental type mismatch errors, but you can explicitly bypass this requirement by declaring `malloc` yourself instead of including the system-wide declaration.
 
+## Example and Manual Test
+
+There is an example library in `examples/logger` that intercepts calls to `malloc`, `free`, `calloc`, and `realloc`. This library tracks the number of bytes allocated and freed by the program, and prints allocation stats just before the program exits.
+
+## C Version
+
 A C-only version is provided in `interpose.h`, differing in the name of the macro, the arguments passed to it, and the constructed name of the original function:
 
 ```c
@@ -31,8 +37,6 @@ INTERPOSE_C_VOID(free, (void* p), (p)) {
 ```
 
 Using `INTERPOSE_C(void, <remaining arguments...>)` may compile, but expands to code that violates constraint #1 of C99 and C11 "6.8.6.4 The `return` statement".
-
-There is an example library in `examples/logger` that intercepts calls to `malloc`, `free`, `calloc`, and `realloc`. This library tracks the number of bytes allocated and freed by the program, and prints allocation stats just before the program exits.
 
 ## Copyright & License
 MIT License
