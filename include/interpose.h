@@ -40,6 +40,43 @@
 #define INTERPOSE_C_VOID(NAME, ARG_TYPE_AND_NAME_LIST, ARG_NAME_LIST) \
   INTERPOSE__C_GENERIC__(void, NAME, ARG_TYPE_AND_NAME_LIST, func ARG_NAME_LIST)
 
+#elif defined(__APPLE__)
+
+/// Structure exposed to the linker for interposition
+struct __osx_interpose {
+	const void* new_func;
+	const void* orig_func;
+};
+
+/**
+ * Generate a macOS interpose struct
+ * Types from: http://opensource.apple.com/source/dyld/dyld-210.2.3/include/mach-o/dyld-interposing.h
+ */
+#define OSX_INTERPOSE_STRUCT(NEW, OLD) \
+  static const struct __osx_interpose __osx_interpose_##OLD \
+    __attribute__((used, section("__DATA, __interpose"))) = \
+    { (const void*)((uintptr_t)(&(NEW))), \
+      (const void*)((uintptr_t)(&(OLD))) }
+
+/**
+  * The OSX interposition process is much simpler. Just create an OSX interpose struct,
+  * include the actual function in the `real` namespace, and declare the beginning of the
+  * replacement function with the appropriate return type.
+  */
+#define INTERPOSE__C_GENERIC__(RETURN_TYPE, NAME, ARG_TYPE_AND_NAME_LIST, ...) \
+  static RETURN_TYPE Real__##NAME ARG_TYPE_AND_NAME_LIST { \
+    __VA_ARGS__; \
+  } \
+  extern RETURN_TYPE __interpose_##NAME ARG_TYPE_AND_NAME_LIST; \
+  OSX_INTERPOSE_STRUCT(__interpose_##NAME, NAME); \
+  extern RETURN_TYPE __interpose_##NAME ARG_TYPE_AND_NAME_LIST
+
+#define INTERPOSE_C(RETURN_TYPE, NAME, ARG_TYPE_AND_NAME_LIST, ARG_NAME_LIST) \
+  INTERPOSE__C_GENERIC__(RETURN_TYPE, NAME, ARG_TYPE_AND_NAME_LIST, return NAME ARG_NAME_LIST)
+
+#define INTERPOSE_C_VOID(NAME, ARG_TYPE_AND_NAME_LIST, ARG_NAME_LIST) \
+  INTERPOSE__C_GENERIC__(void, NAME, ARG_TYPE_AND_NAME_LIST, NAME ARG_NAME_LIST)
+
 #else
 # error Unsupported platform.
 #endif

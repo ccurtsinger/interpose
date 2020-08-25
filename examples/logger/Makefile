@@ -4,8 +4,10 @@ CC := clang
 ifeq ($(shell uname -s),Darwin)
 SHLIB_SUFFIX := dylib
 PRELOAD_VAR  := DYLD_INSERT_LIBRARIES
-CXXLIB       := $(CXX) -shared -fPIC -compatibility_version 1 -current_version 1 \
-                        -dynamiclib
+DARWIN_DYLIB_FLAGS := -shared -fPIC -compatibility_version 1 -current_version 1 \
+                      -dynamiclib
+CXXLIB       := $(CXX) $(DARWIN_DYLIB_FLAGS)
+CCLIB        := $(CC) $(DARWIN_DYLIB_FLAGS)
 else
 SHLIB_SUFFIX := so
 PRELOAD_VAR  := LD_PRELOAD
@@ -13,7 +15,7 @@ CXXLIB       := $(CXX) -shared -fPIC -Wl,-soname,interposer.so
 CCLIB        := $(CC) -shared -fPIC
 endif
 
-all: logger.$(SHLIB_SUFFIX)
+all: logger.$(SHLIB_SUFFIX) logger_c.$(SHLIB_SUFFIX)
 
 clean:
 	@rm -f logger.$(SHLIB_SUFFIX) logger_c.$(SHLIB_SUFFIX) testprog

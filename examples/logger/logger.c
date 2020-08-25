@@ -1,4 +1,6 @@
-#define _GNU_SOURCE
+#if !defined(__APPLE__)
+# define _GNU_SOURCE
+#endif
 
 #include <stdint.h>
 #include <stdio.h>
