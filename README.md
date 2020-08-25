@@ -16,6 +16,8 @@ This line declares a replacement function for `malloc` that logs the result, the
 
 There is an example library in `examples/logger` that intercepts calls to `malloc`, `free`, `calloc`, and `realloc`. This library tracks the number of bytes allocated and freed by the program, and prints allocation stats just before the program exits.
 
+Invoking `make test` in the mentioned directory will build and use the C++ version of the example interposition library, then run the test program with that library preloaded. Invoking `make test_c` will use the C version of the library instead.
+
 ## C Version
 
 A C-only version is provided in `interpose.h`, differing in the name of the macro, the arguments passed to it, and the constructed name of the original function:
