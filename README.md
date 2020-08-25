@@ -21,6 +21,17 @@ INTERPOSE_C(void*, malloc, (size_t sz), (sz)) {
 }
 ```
 
+For interposing functions returning `void`, the macro `INTERPOSE_C_VOID()` is provided:
+
+```c
+INTERPOSE_C_VOID(free, (void* p), (p)) {
+  fprintf(stderr, "Caught a call to free()\n");
+  Real__free(p);
+}
+```
+
+Using `INTERPOSE_C(void, <remaining arguments...>)` may compile, but expands to code that violates constraint #1 of C99 and C11 "6.8.6.4 The `return` statement".
+
 There is an example library in `examples/logger` that intercepts calls to `malloc`, `free`, `calloc`, and `realloc`. This library tracks the number of bytes allocated and freed by the program, and prints allocation stats just before the program exits.
 
 ## Copyright & License

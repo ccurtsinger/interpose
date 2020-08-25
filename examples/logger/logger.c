@@ -25,7 +25,7 @@ INTERPOSE_C(void*, malloc, (size_t sz), (sz)) {
   return result;
 }
 
-INTERPOSE_C(void, free, (void* p), (p)) {
+INTERPOSE_C_VOID(free, (void* p), (p)) {
   freed_bytes += malloc_usable_size(p);
   Real__free(p);
 }
@@ -52,7 +52,7 @@ INTERPOSE_C(void*, realloc, (void* p, size_t sz), (p, sz)) {
   return result;
 }
 
-INTERPOSE_C(void, exit, (int status), (status)) {
+INTERPOSE_C_VOID(exit, (int status), (status)) {
   fprintf(stderr, START_COLOR);
   fprintf(stderr, "\n\nProgram Allocation Stats\n");
   fprintf(stderr, "  allocated %zu bytes\n", allocated_bytes);
