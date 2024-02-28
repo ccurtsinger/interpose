@@ -23,6 +23,10 @@ template<typename R, typename... Args> struct fn_info<R(Args...)> {
   using ret_type = R;
 };
 
+/// Starting with C++17, some library implementations of malloc are marked noexcept.
+template<typename R, typename... Args>
+struct fn_info<R(Args...) noexcept> : fn_info<R(Args...)> {};
+
 #if defined(__ELF__)
 
 /**
